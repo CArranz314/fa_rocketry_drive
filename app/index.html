@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG</title>
+</head>
+<body>
+    hola mundo
+    <form action="" method="post">
+        <input type="text" name="pregunta" id="pregunta">
+        <input type="submit" value="Enviar" id="boton_enviar">
+    </form>
+    <div id="respuesta"></div>
+    <script>
+        const form = document.querySelector('form');
+        const input = document.querySelector('input');
+        const respuesta = document.querySelector('#respuesta');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            boton_enviar.disabled = true;
+            const pregunta = input.value;
+            const response = await fetch(`http://localhost:8000/pregunta/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({pregunta: pregunta})
+                })
+            const data = await response.json();
+            console.log(data)
+            console.log('----------------')
+            respuesta.innerHTML=''
+            for (const key in data) {
+                console.log(key, data[key])
+                if (key=='mensaje'){
+                    respuesta.innerHTML+='<br>RESPUESTA: '+data[key].content+'<br>coste: '+data[key].response_metadata.token_usage.completion_tokens+', '+data[key].response_metadata.token_usage.prompt_tokens+', '+data[key].response_metadata.token_usage.total_tokens+'<br>'
+                }else{
+                respuesta.innerHTML+=key+': '+data[key].score+'<br>contenido:'+data[key].content+'<br>archivo:'+data[key].metadata.filename+'<br><hr><br>'
+                }
+            }
+            boton_enviar.disabled = false;
+        });
+    </script>
+</body>
+</html>
